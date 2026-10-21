@@ -777,11 +777,6 @@ html, body {
 /* Component Nodes (Clean White Cards) */
 .arch-node-group {
   cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.arch-node-group:hover {
-  transform: translateY(-2px);
 }
 
 .arch-node-card {
@@ -789,20 +784,30 @@ html, body {
   stroke: #cbd5e1;
   stroke-width: 1.2;
   rx: 8px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
-  transition: all 0.2s;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.05));
+  transition: stroke 0.15s ease, fill 0.15s ease, filter 0.15s ease, stroke-width 0.15s ease;
 }
 
 .arch-node-group:hover .arch-node-card {
   stroke: var(--aws-orange);
-  filter: drop-shadow(0 4px 10px rgba(255, 153, 0, 0.2));
+  stroke-width: 1.6;
+  fill: #fffaf5;
+  filter: drop-shadow(0 2px 6px rgba(255, 153, 0, 0.2));
+}
+
+.arch-node-group:hover .arch-node-label {
+  fill: var(--aws-orange-dark);
 }
 
 .arch-node-group.is-selected .arch-node-card {
   stroke: var(--accent-green);
   stroke-width: 2;
   fill: #f0fdf4;
-  filter: drop-shadow(0 4px 12px rgba(22, 163, 74, 0.25));
+  filter: drop-shadow(0 2px 6px rgba(22, 163, 74, 0.2));
+}
+
+.arch-node-group.is-selected .arch-node-label {
+  fill: var(--text-main);
 }
 
 .arch-node-label {
