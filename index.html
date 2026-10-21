@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Config Map — AWS Student Builder Group</title>
+  <meta name="description" content="Config Map: AWS Student Builder Group technical observation challenge. Audit 8 architectures, detect the 3 missing AWS components, and beat the 3:00 station timer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-light">
+  <div id="app" class="app-container">
+    <!-- Top HUD Navigation -->
+    <header class="hud-header" id="hud-header">
+      <div class="hud-brand">
+        <div class="brand-badge">
+          <div class="aws-logo-icon" aria-label="AWS">
+            <span class="aws-icon-text">aws</span>
+          </div>
+          <div class="brand-text-col">
+            <span class="group-tagline">AWS STUDENT BUILDER GROUP</span>
+            <h1 class="brand-title">CONFIG MAP</h1>
+          </div>
+        </div>
+        <div class="station-tag" id="station-tag">
+          <span class="status-pulse"></span>
+          <span class="station-text">ROOM 327 / 331 &bull; CIRCUIT</span>
+        </div>
+      </div>
+
+      <!-- Center Master Timer (3:00 Cap) -->
+      <div class="hud-timer-card" id="hud-timer-card">
+        <div class="timer-meta">
+          <span class="timer-label">STATION TIMER</span>
+          <span class="timer-target">CAP 3:00</span>
+        </div>
+        <div class="timer-digits-container">
+          <span class="timer-digits" id="timer-display">03:00<span class="timer-ms">.00</span></span>
+        </div>
+        <div class="timer-progress-bar">
+          <div class="timer-progress-fill" id="timer-progress-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Right HUD Controls & Score -->
+      <div class="hud-stats">
+        <div class="stat-pill score-pill" id="score-card">
+          <span class="stat-label">SCORE</span>
+          <div class="stat-val"><span id="score-display">0</span><span class="stat-max">/ 240</span></div>
+        </div>
+
+        <div class="stat-pill round-pill" id="round-card">
+          <span class="stat-label">ROUND</span>
+          <div class="stat-val"><span id="current-round-num">1</span><span class="stat-max">/ 8</span></div>
+        </div>
+
+        <div class="hud-actions">
+          <button class="btn-icon" id="btn-rules" title="Official Challenge Rules" aria-label="Official Rules">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span class="btn-label-desktop">Rules</span>
+          </button>
+          <button class="btn-icon" id="btn-sound" title="Toggle Sound FX" aria-label="Toggle Sound FX">
+            <svg id="icon-sound-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg id="icon-sound-off" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          </button>
+          <button class="btn-icon btn-danger-soft" id="btn-restart" title="Reset Station" aria-label="Reset Station">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Round Progress Tracker (8 Rounds) -->
+    <nav class="round-tracker" id="round-tracker" aria-label="Round Progress">
+      <!-- 8 pill items dynamically populated -->
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="main-workspace" id="main-workspace">
+      <!-- Architecture Scenario Info Strip -->
+      <section class="scenario-banner" id="scenario-banner">
+        <div class="scenario-details">
+          <div class="scenario-badge-row">
+            <span class="scenario-number" id="banner-round-tag">ARCH 01 / 08</span>
+            <span class="scenario-category-pill" id="banner-category">SERVERLESS &bull; HIGH THROUGHPUT</span>
+            <span class="diff-tag">EXACTLY 3 MISSING</span>
+          </div>
+          <h2 class="scenario-title" id="banner-title">Serverless E-Commerce & Event Processing</h2>
+          <p class="scenario-desc" id="banner-desc">High-throughput microservices processing transactions, async order queues, and customer event notifications.</p>
+        </div>
+
+        <div class="view-controls">
+          <div class="control-toggle-group">
+            <button class="view-btn active" id="btn-view-side" title="Side-by-Side Dual View">Side by Side</button>
+            <button class="view-btn" id="btn-diff-mode" title="Highlight Missing Delta">Diff Mode</button>
+          </div>
+          <div class="zoom-controls">
+            <button class="tool-btn" id="btn-zoom-in" title="Zoom In">+</button>
+            <button class="tool-btn" id="btn-zoom-reset" title="Reset Fit">100%</button>
+            <button class="tool-btn" id="btn-zoom-out" title="Zoom Out">&minus;</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobile Diagram Tab Switcher (Visible only on mobile/narrow screens) -->
+      <div class="mobile-tab-bar" id="mobile-tab-bar">
+        <button class="mobile-tab-btn active" id="tab-ref-btn" data-target="panel-reference">
+          <span class="tab-dot green"></span>
+          <span>Reference (Complete)</span>
+        </button>
+        <button class="mobile-tab-btn" id="tab-inc-btn" data-target="panel-incomplete">
+          <span class="tab-dot orange"></span>
+          <span>Target (3 Missing)</span>
+        </button>
+      </div>
+
+      <!-- Comparative Diagram Boards -->
+      <div class="boards-split-container show-ref-on-mobile" id="boards-container">
+        <!-- Left Panel: Reference Diagram -->
+        <div class="diagram-panel reference-panel" id="panel-reference">
+          <div class="panel-header">
+            <div class="panel-tag tag-reference">
+              <span class="panel-status-dot green"></span>
+              <strong>REFERENCE ARCHITECTURE</strong>
+              <span class="panel-sub">(Complete 100%)</span>
+            </div>
+            <div class="panel-hint">
+              <span>Tap component to select</span>
+            </div>
+          </div>
+          <div class="diagram-viewport" id="viewport-reference">
+            <div class="diagram-canvas" id="canvas-reference">
+              <!-- SVG Reference Architecture is injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Divider (Desktop) -->
+        <div class="split-divider" id="split-divider">
+          <div class="divider-handle">
+            <span>VS</span>
+          </div>
+        </div>
+
+        <!-- Right Panel: Incomplete Diagram -->
+        <div class="diagram-panel incomplete-panel" id="panel-incomplete">
+          <div class="panel-header">
+            <div class="panel-tag tag-incomplete">
+              <span class="panel-status-dot orange"></span>
+              <strong>AUDIT TARGET</strong>
+              <span class="panel-sub">(3 Components Missing)</span>
+            </div>
+            <div class="panel-hint">
+              <span class="pulse-warning-text">3 Ghost slots</span>
+            </div>
+          </div>
+          <div class="diagram-viewport" id="viewport-incomplete">
+            <div class="diagram-canvas" id="canvas-incomplete">
+              <!-- SVG Incomplete Architecture is injected here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missing Component Selection & Submission Dock -->
+      <footer class="submission-dock" id="submission-dock">
+        <div class="dock-left">
+          <div class="dock-title-group">
+            <h3 class="dock-title">DETECTED MISSING (3)</h3>
+            <span class="dock-counter" id="slot-counter"><strong id="selected-count">0</strong>/3</span>
+          </div>
+
+          <!-- 3 Interactive Selected Slots -->
+          <div class="slots-container" id="slots-container">
+            <div class="component-slot empty" id="slot-0" data-index="0" title="Slot 1">
+              <span class="slot-number">1</span>
+              <span class="slot-placeholder">Select missing 1...</span>
+              <button class="slot-clear-btn" aria-label="Clear slot 1">&times;</button>
+            </div>
+            <div class="component-slot empty" id="slot-1" data-index="1" title="Slot 2">
+              <span class="slot-number">2</span>
+              <span class="slot-placeholder">Select missing 2...</span>
+              <button class="slot-clear-btn" aria-label="Clear slot 2">&times;</button>
+            </div>
+            <div class="component-slot empty" id="slot-2" data-index="2" title="Slot 3">
+              <span class="slot-number">3</span>
+              <span class="slot-placeholder">Select missing 3...</span>
+              <button class="slot-clear-btn" aria-label="Clear slot 3">&times;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dock-center">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="service-search-input" placeholder="Type AWS service (e.g. S3, RDS, ALB, EC2)..." autocomplete="off" spellcheck="false">
+            <button class="search-clear-btn" id="search-clear-btn" title="Clear search">&times;</button>
+            <div class="autocomplete-dropdown hidden" id="autocomplete-dropdown">
+              <!-- Autocomplete suggestions -->
+            </div>
+          </div>
+
+          <!-- Service Quick-Pick Chips -->
+          <div class="service-chip-bank" id="service-chip-bank">
+            <!-- Candidate chips dynamically generated -->
+          </div>
+        </div>
+
+        <div class="dock-actions">
+          <button class="btn btn-secondary" id="btn-clear-slots" title="Clear all selections">Clear</button>
+          <button class="btn btn-primary" id="btn-submit-audit" disabled>
+            <span class="btn-text">SUBMIT AUDIT (0/3)</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Start / Introduction Overlay -->
+    <div class="modal-backdrop active" id="modal-intro">
+      <div class="modal-card modal-intro-card">
+        <div class="intro-header">
+          <div class="intro-badge">AWS STUDENT BUILDER GROUP</div>
+          <h2 class="intro-title">🗺️ CONFIG MAP</h2>
+          <p class="intro-tagline">Cloud Architecture Visual Observation & Auditing Challenge</p>
+        </div>
+
+        <div class="intro-grid">
+          <div class="intro-item">
+            <div class="intro-icon">⏱️</div>
+            <div class="intro-text">
+              <h4>3:00 Station Clock</h4>
+              <p>Total 3 minutes across 8 architectures. Maintain steady pace!</p>
+            </div>
+          </div>
+          <div class="intro-item">
+            <div class="intro-icon">🔍</div>
+            <div class="intro-text">
+              <h4>Exactly 3 Missing</h4>
+              <p>Compare Reference vs Incomplete diagram. Identify the 3 removed components.</p>
+            </div>
+          </div>
+          <div class="intro-item">
+            <div class="intro-icon">🎯</div>
+            <div class="intro-text">
+              <h4>240 Points Total</h4>
+              <p>+10 points per component (30 pts per round). Fastest time breaks ties!</p>
+            </div>
+          </div>
+          <div class="intro-item">
+            <div class="intro-icon">⚡</div>
+            <div class="intro-text">
+              <h4>Tap or Search</h4>
+              <p>Tap nodes on Reference diagram, tap ghost slots, or search abbreviations like S3, ALB.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="station-meta-strip">
+          <div class="meta-col">
+            <span class="meta-label">HOST STATION</span>
+            <span class="meta-val">AWS Student Builder Group &bull; Room 327 / 331</span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">MATCH CRITERIA</span>
+            <span class="meta-val">8 Architectures &bull; 10 Pts / Component &bull; 240 Max</span>
+          </div>
+        </div>
+
+        <div class="intro-actions">
+          <button class="btn btn-secondary" id="btn-intro-rules">Official Rules</button>
+          <button class="btn btn-primary btn-large" id="btn-start-game">
+            <span>START 3-MINUTE CHALLENGE</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Official Rules Modal -->
+    <div class="modal-backdrop hidden" id="modal-rules">
+      <div class="modal-card modal-rules-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-pre">AWS STUDENT BUILDER GROUP</span>
+            <h3>🗺️ Config Map — Challenge Rules</h3>
+          </div>
+          <button class="modal-close-btn" id="btn-close-rules">&times;</button>
+        </div>
+        <div class="modal-body rules-body">
+          <div class="rule-section">
+            <h4>📌 Overview & Challenge Concept</h4>
+            <p><strong>Config Map</strong> is a fast-paced technical observation challenge organized by the <strong>AWS Student Builder Group</strong>.</p>
+            <p>Each round presents two diagrams: <strong>1 Reference Diagram</strong> (complete architecture) and <strong>1 Incomplete Diagram</strong> with <strong>exactly three (3) critical AWS components missing</strong>.</p>
+          </div>
+
+          <div class="rule-section">
+            <h4>⏱️ Time Limits & Stations</h4>
+            <ul>
+              <li><strong>Station Cap:</strong> Exactly <strong>3:00 Minutes</strong> total station cap.</li>
+              <li><strong>Rounds:</strong> <strong>8 architectures</strong> in total.</li>
+              <li><strong>Locations:</strong> Room 327 (Track B) and Room 331 (Track A & C).</li>
+            </ul>
+          </div>
+
+          <div class="rule-section">
+            <h4>🎯 Scoring & Evaluation</h4>
+            <ul>
+              <li><strong>Per-Component Score:</strong> <strong>10 points</strong> for each correctly identified component.</li>
+              <li><strong>Round Maximum:</strong> <strong>30 points</strong> per round (3 × 10 points).</li>
+              <li><strong>Match Total:</strong> Up to <strong>240 points</strong> across 8 rounds.</li>
+              <li><strong>Tie-Breaker:</strong> Fastest elapsed completion time.</li>
+            </ul>
+          </div>
+
+          <div class="rule-section">
+            <h4>📋 Mobile & Keyboard Controls</h4>
+            <ul>
+              <li><strong>Mobile:</strong> Use the tab switcher above the diagram to alternate between Reference and Target view.</li>
+              <li><strong>Tap directly:</strong> Tap any component in the Reference diagram to toggle selection.</li>
+              <li><strong>Abbreviations:</strong> Type abbreviations like <code>S3</code>, <code>ALB</code>, <code>RDS</code>, <code>EC2</code>, <code>WAF</code>.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="btn-rules-back">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round Evaluation Modal -->
+    <div class="modal-backdrop hidden" id="modal-round-eval">
+      <div class="modal-card modal-eval-card">
+        <div class="eval-header">
+          <div class="eval-badge" id="eval-round-badge">ROUND 1 OF 8</div>
+          <h3 class="eval-title" id="eval-title">Architecture Audit Completed</h3>
+          <div class="eval-score-banner" id="eval-score-banner">
+            <span class="eval-points" id="eval-points">+30</span>
+            <span class="eval-score-sub">POINTS EARNED THIS ROUND</span>
+          </div>
+        </div>
+
+        <div class="eval-body">
+          <h4 class="eval-section-title">MISSING AWS COMPONENTS</h4>
+          <div class="eval-items-list" id="eval-items-list">
+            <!-- Injected per item breakdown with correct / missed indicators -->
+          </div>
+        </div>
+
+        <div class="eval-footer">
+          <div class="auto-advance-meta">
+            <span>Next architecture in <strong id="auto-advance-timer">3</strong>s</span>
+          </div>
+          <button class="btn btn-primary btn-large" id="btn-next-round">
+            <span>NEXT ROUND</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Match Summary & Tournament Scorecard -->
+    <div class="modal-backdrop hidden" id="modal-gameover">
+      <div class="modal-card modal-gameover-card">
+        <div class="gameover-header">
+          <div class="trophy-badge" id="gameover-rank-icon">🏆</div>
+          <div class="gameover-title-wrap">
+            <span class="gameover-sub">AWS STUDENT BUILDER GROUP &bull; AUDIT SCORECARD</span>
+            <h2 class="gameover-title" id="gameover-headline">MATCH COMPLETE!</h2>
+            <div class="gameover-rank" id="gameover-rank-title">AWS Principal Solutions Architect</div>
+          </div>
+        </div>
+
+        <!-- Master Score Grid (240 Max) -->
+        <div class="score-summary-grid">
+          <div class="summary-metric highlight">
+            <span class="metric-label">FINAL SCORE</span>
+            <div class="metric-val"><span id="final-score-val">240</span><span class="metric-total">/ 240</span></div>
+            <span class="metric-foot" id="final-accuracy-val">100% Component Accuracy</span>
+          </div>
+          <div class="summary-metric">
+            <span class="metric-label">ELAPSED TIME (TIE-BREAKER)</span>
+            <div class="metric-val timer-mono" id="final-time-val">02:18.42</div>
+            <span class="metric-foot">Official Station Clock</span>
+          </div>
+          <div class="summary-metric">
+            <span class="metric-label">DETECTED COMPONENTS</span>
+            <div class="metric-val" id="final-detected-ratio">24 / 24</div>
+            <span class="metric-foot">Across 8 Architectures</span>
+          </div>
+        </div>
+
+        <!-- 8 Round Breakdown Table -->
+        <div class="round-breakdown-section">
+          <h4>ROUND-BY-ROUND AUDIT AUDIT LOG</h4>
+          <div class="table-wrap">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Round</th>
+                  <th>Architecture Scenario</th>
+                  <th>Detected (3)</th>
+                  <th>Score</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="gameover-table-body">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="gameover-actions">
+          <button class="btn btn-secondary" id="btn-copy-score">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-btn-text">Copy Score Report</span>
+          </button>
+          <button class="btn btn-primary btn-large" id="btn-play-again">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>START NEW MATCH</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load dependencies -->
+  <script src="icons.js"></script>
+  <script src="diagrams.js"></script>
+  <script src="audio.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
