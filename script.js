@@ -1,17 +1,17 @@
 /**
- * Config Map — AWS Cloud Architecture Audit Challenge
- * Game Engine & Interactive Diagram Controller
+ * Config Map — AWS Student Builder Group
+ * Game Engine & Interactive Diagram Controller (8 Architectures, Minimalist White & Orange)
  */
 
 (function () {
   'use strict';
 
-  // Game Configuration & State
-  const TOTAL_ROUNDS = 10;
+  // Game Configuration & State (8 Architectures, 240 Max Points)
+  const TOTAL_ROUNDS = 8;
   const MASTER_TIMER_MS = 180 * 1000; // 3:00 station cap
   const POINTS_PER_COMPONENT = 10;
   const MAX_ROUND_SCORE = 30;
-  const MAX_TOTAL_SCORE = TOTAL_ROUNDS * MAX_ROUND_SCORE; // 300
+  const MAX_TOTAL_SCORE = TOTAL_ROUNDS * MAX_ROUND_SCORE; // 240
 
   let gameState = {
     isActive: false,
@@ -47,6 +47,10 @@
     canvasIncomplete: document.getElementById('canvas-incomplete'),
     boardsContainer: document.getElementById('boards-container'),
 
+    // Mobile Diagram Tabs
+    tabRefBtn: document.getElementById('tab-ref-btn'),
+    tabIncBtn: document.getElementById('tab-inc-btn'),
+
     slots: [
       document.getElementById('slot-0'),
       document.getElementById('slot-1'),
@@ -76,7 +80,6 @@
     btnSound: document.getElementById('btn-sound'),
     iconSoundOn: document.getElementById('icon-sound-on'),
     iconSoundOff: document.getElementById('icon-sound-off'),
-    btnFullscreen: document.getElementById('btn-fullscreen'),
     btnRestart: document.getElementById('btn-restart'),
     btnNextRound: document.getElementById('btn-next-round'),
     autoAdvanceTimerSpan: document.getElementById('auto-advance-timer'),
@@ -133,7 +136,7 @@
     return `${pad(minutes)}:${pad(seconds)}.${pad(hundredths)}`;
   }
 
-  // Initialize Round Tracker Pills
+  // Initialize Round Tracker (8 rounds A01 - A08)
   function initRoundTracker() {
     dom.roundTracker.innerHTML = '';
     for (let i = 0; i < TOTAL_ROUNDS; i++) {
@@ -156,7 +159,26 @@
     }
   }
 
-  // Build SVG Architecture Diagram
+  // Mobile Diagram Tabs Switcher
+  if (dom.tabRefBtn && dom.tabIncBtn) {
+    dom.tabRefBtn.addEventListener('click', () => {
+      dom.tabRefBtn.classList.add('active');
+      dom.tabIncBtn.classList.remove('active');
+      dom.boardsContainer.classList.add('show-ref-on-mobile');
+      dom.boardsContainer.classList.remove('show-inc-on-mobile');
+      window.soundFx.click();
+    });
+
+    dom.tabIncBtn.addEventListener('click', () => {
+      dom.tabIncBtn.classList.add('active');
+      dom.tabRefBtn.classList.remove('active');
+      dom.boardsContainer.classList.add('show-inc-on-mobile');
+      dom.boardsContainer.classList.remove('show-ref-on-mobile');
+      window.soundFx.click();
+    });
+  }
+
+  // Build SVG Architecture Diagram (Minimalist Light Mode)
   function renderArchitectureSVG(archData, isIncomplete = false) {
     const viewBoxW = 940;
     const viewBoxH = 490;
@@ -165,11 +187,11 @@
     // Containers (VPC, Subnets, Tiers)
     const containersSvg = archData.containers.map(c => `
       <g class="arch-container-group">
-        <rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="12"
-              fill="${c.color}" stroke="${c.border}" class="arch-container-box" />
-        <rect x="${c.x + 14}" y="${c.y + 12}" width="${Math.min(c.w - 28, 200)}" height="22" rx="4"
-              fill="rgba(0,0,0,0.4)" />
-        <text x="${c.x + 20}" y="${c.y + 27}" fill="${c.border}" class="arch-container-label">${c.label}</text>
+        <rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="10"
+              fill="${c.color || 'rgba(0,0,0,0.02)'}" stroke="${c.border}" class="arch-container-box" />
+        <rect x="${c.x + 12}" y="${c.y + 10}" width="${Math.min(c.w - 24, 190)}" height="20" rx="3"
+              fill="#ffffff" stroke="${c.border}" stroke-width="0.8" />
+        <text x="${c.x + 18}" y="${c.y + 24}" fill="${c.border}" class="arch-container-label">${c.label}</text>
       </g>
     `).join('');
 
@@ -191,7 +213,7 @@
       // Check if this connection touches a missing component in incomplete diagram
       const isMissingTouch = isIncomplete && (missingSet.has(conn.from) || missingSet.has(conn.to));
 
-      // Calculate path (smooth cubic curve or orthogonal)
+      // Calculate path (smooth cubic curve)
       const dx = x2 - x1;
       const dy = y2 - y1;
       const cx1 = x1 + dx * 0.45;
@@ -205,11 +227,11 @@
       const midY = (y1 + y2) / 2;
 
       if (isMissingTouch) {
-        // Render severed / severed dashed flow
+        // Render severed dashed flow
         return `
           <g class="arch-conn-group severed">
-            <path d="${pathD}" stroke="rgba(239, 68, 68, 0.4)" stroke-width="1.8" stroke-dasharray="4 4" fill="none" />
-            <circle cx="${x1 + dx * 0.5}" cy="${y1 + dy * 0.5}" r="3" fill="#ef4444" opacity="0.6" />
+            <path d="${pathD}" stroke="#fca5a5" stroke-width="1.8" stroke-dasharray="4 4" fill="none" />
+            <circle cx="${x1 + dx * 0.5}" cy="${y1 + dy * 0.5}" r="3" fill="#ef4444" opacity="0.7" />
           </g>
         `;
       }
@@ -219,7 +241,7 @@
           <path d="${pathD}" class="arch-conn-path" />
           <path d="${pathD}" class="arch-conn-flow" />
           ${conn.label ? `
-            <rect x="${midX - 38}" y="${midY - 9}" width="76" height="18" class="arch-conn-label-bg" />
+            <rect x="${midX - 36}" y="${midY - 8}" width="72" height="16" class="arch-conn-label-bg" />
             <text x="${midX}" y="${midY + 3}" class="arch-conn-label">${conn.label}</text>
           ` : ''}
         </g>
@@ -237,11 +259,11 @@
             <!-- Ghost dashed card -->
             <rect width="${node.w}" height="${node.h}" class="ghost-slot-rect" />
             <!-- Radar pulsing wave -->
-            <circle cx="${node.w / 2}" cy="${node.h / 2}" class="ghost-slot-pulse" fill="none" stroke="#ef4444" stroke-width="1.5" />
+            <circle cx="${node.w / 2}" cy="${node.h / 2}" class="ghost-slot-pulse" fill="none" stroke="#ea580c" stroke-width="1.5" />
             
-            <circle cx="${node.w / 2}" cy="${node.h / 2 - 8}" r="14" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" stroke-width="1.5" />
+            <circle cx="${node.w / 2}" cy="${node.h / 2 - 7}" r="13" fill="#ffedd5" stroke="#ea580c" stroke-width="1.2" />
             <text x="${node.w / 2}" y="${node.h / 2}" class="ghost-slot-icon-q">?</text>
-            <text x="${node.w / 2}" y="${node.h / 2 + 20}" class="ghost-slot-text">MISSING COMPONENT</text>
+            <text x="${node.w / 2}" y="${node.h / 2 + 18}" class="ghost-slot-text">MISSING COMPONENT</text>
           </g>
         `;
       }
@@ -260,13 +282,13 @@
           <rect width="${node.w}" height="${node.h}" class="arch-node-card" />
           
           <!-- Selected check badge -->
-          <g class="arch-node-selected-badge" transform="translate(${node.w - 18}, -6)">
-            <circle cx="10" cy="10" r="10" fill="#10B981" />
-            <path d="M6 10L9 13L14 7" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          <g class="arch-node-selected-badge" transform="translate(${node.w - 18}, -5)">
+            <circle cx="9" cy="9" r="9" fill="#16a34a" />
+            <path d="M5 9L8 12L13 6" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </g>
 
           <!-- AWS Service Icon -->
-          <g transform="translate(12, 10)">
+          <g transform="translate(10, 10)">
             <foreignObject width="46" height="46">
               <div xmlns="http://www.w3.org/1999/xhtml" style="width: 100%; height: 100%;">
                 ${iconSvg}
@@ -275,8 +297,8 @@
           </g>
 
           <!-- Labels -->
-          <text x="68" y="28" class="arch-node-label">${node.label}</text>
-          <text x="68" y="44" class="arch-node-sub">${node.sub || ''}</text>
+          <text x="64" y="27" class="arch-node-label">${node.label}</text>
+          <text x="64" y="42" class="arch-node-sub">${node.sub || ''}</text>
         </g>
       `;
     }).join('');
@@ -284,8 +306,8 @@
     return `
       <svg viewBox="0 0 ${viewBoxW} ${viewBoxH}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id="arch-grid-${isIncomplete ? 'inc' : 'ref'}" width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M 28 0 L 0 0 0 28" fill="none" class="arch-grid-line" />
+          <pattern id="arch-grid-${isIncomplete ? 'inc' : 'ref'}" width="24" height="24" patternUnits="userSpaceOnUse">
+            <path d="M 24 0 L 0 0 0 24" fill="none" class="arch-grid-line" />
           </pattern>
         </defs>
         
@@ -309,8 +331,8 @@
     const arch = window.CONFIG_MAP_DIAGRAMS[gameState.currentRoundIndex];
     if (!arch) return;
 
-    // Update banner metadata
-    dom.bannerRoundTag.textContent = `ARCH ${String(gameState.currentRoundIndex + 1).padStart(2, '0')} / 10`;
+    // Update banner metadata for 8 rounds
+    dom.bannerRoundTag.textContent = `ARCH ${String(gameState.currentRoundIndex + 1).padStart(2, '0')} / 08`;
     dom.currentRoundNum.textContent = gameState.currentRoundIndex + 1;
     dom.bannerTitle.textContent = arch.title;
     dom.bannerDesc.textContent = arch.scenario;
@@ -338,24 +360,24 @@
     dom.canvasReference.innerHTML = renderArchitectureSVG(arch, false);
     dom.canvasIncomplete.innerHTML = renderArchitectureSVG(arch, true);
 
-    // Attach click handlers to reference nodes
+    // Attach click/touch handlers to reference nodes
     const refNodes = dom.canvasReference.querySelectorAll('.arch-node-group');
     refNodes.forEach(nodeEl => {
-      nodeEl.addEventListener('click', () => {
+      nodeEl.addEventListener('click', (e) => {
+        e.stopPropagation();
         const service = nodeEl.getAttribute('data-service');
         toggleServiceSelection(service);
       });
     });
 
-    // Attach click handlers to incomplete ghost slots
+    // Attach click/touch handlers to incomplete ghost slots
     const ghostSlots = dom.canvasIncomplete.querySelectorAll('.ghost-slot-group');
     ghostSlots.forEach(slotEl => {
-      slotEl.addEventListener('click', () => {
-        const service = slotEl.getAttribute('data-service');
+      slotEl.addEventListener('click', (e) => {
+        e.stopPropagation();
         window.soundFx.click();
-        // Focus search input and pre-fill or suggest
         dom.serviceSearchInput.focus();
-        dom.serviceSearchInput.placeholder = "Detected ghost slot! Type or select missing AWS service...";
+        dom.serviceSearchInput.placeholder = "Detected ghost slot! Search or tap service...";
       });
     });
   }
@@ -364,10 +386,7 @@
   function renderServiceChips(arch) {
     dom.serviceChipBank.innerHTML = '';
 
-    // Collect all unique services present in this architecture
     const servicesInArch = [...new Set(arch.nodes.map(n => n.service))];
-    
-    // Sort so missing items aren't obvious (alphabetical order)
     servicesInArch.sort();
 
     servicesInArch.forEach(svcId => {
@@ -395,14 +414,11 @@
   function toggleServiceSelection(serviceId) {
     const index = gameState.selectedServiceIds.indexOf(serviceId);
     if (index > -1) {
-      // Remove
       gameState.selectedServiceIds.splice(index, 1);
       window.soundFx.deselect();
     } else {
-      // Add if < 3
       if (gameState.selectedServiceIds.length >= 3) {
         window.soundFx.warning();
-        // Shake slots
         dom.slots.forEach(s => s.classList.add('shake'));
         setTimeout(() => dom.slots.forEach(s => s.classList.remove('shake')), 300);
         return;
@@ -439,7 +455,7 @@
       const serviceId = gameState.selectedServiceIds[i];
 
       if (serviceId) {
-        const meta = window.AWS_SERVICE_NAMES[serviceId] || { name: serviceId, category: 'AWS Service' };
+        const meta = window.AWS_SERVICE_NAMES[serviceId] || { name: serviceId, category: 'AWS' };
         const iconSvg = window.AWS_ICONS[serviceId] || window.AWS_ICONS.missing;
 
         slotEl.className = 'component-slot filled';
@@ -462,7 +478,7 @@
         slotEl.className = 'component-slot empty';
         slotEl.innerHTML = `
           <span class="slot-number">${i + 1}</span>
-          <span class="slot-placeholder">Select missing component ${i + 1}...</span>
+          <span class="slot-placeholder">Select missing ${i + 1}...</span>
           <button class="slot-clear-btn" aria-label="Clear slot">&times;</button>
         `;
       }
@@ -494,7 +510,6 @@
 
       clearBtn.classList.add('active');
 
-      // Filter from all known AWS services
       const matches = Object.entries(window.AWS_SERVICE_NAMES).filter(([id, svc]) => {
         return (
           id.toLowerCase().includes(query) ||
@@ -505,12 +520,12 @@
       });
 
       if (matches.length === 0) {
-        dropdown.innerHTML = `<div class="autocomplete-item"><span class="autocomplete-meta">No matching AWS service found</span></div>`;
+        dropdown.innerHTML = `<div class="autocomplete-item"><span class="autocomplete-meta">No matching AWS service</span></div>`;
         dropdown.classList.remove('hidden');
         return;
       }
 
-      dropdown.innerHTML = matches.slice(0, 7).map(([id, svc]) => {
+      dropdown.innerHTML = matches.slice(0, 6).map(([id, svc]) => {
         const iconSvg = window.AWS_ICONS[id] || window.AWS_ICONS.missing;
         return `
           <div class="autocomplete-item" data-service="${id}">
@@ -525,7 +540,6 @@
 
       dropdown.classList.remove('hidden');
 
-      // Attach click to options
       dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
         item.addEventListener('click', () => {
           const svcId = item.getAttribute('data-service');
@@ -546,14 +560,12 @@
       input.focus();
     });
 
-    // Close autocomplete on click outside
     document.addEventListener('click', (e) => {
       if (!input.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.classList.add('hidden');
       }
     });
 
-    // Enter in search to select top result or submit
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const firstMatch = dropdown.querySelector('.autocomplete-item[data-service]');
@@ -583,10 +595,9 @@
     if (!arch) return;
 
     const roundElapsedMs = Date.now() - gameState.roundStartTime;
-    const missingActual = arch.missing; // 3 actual missing IDs
+    const missingActual = arch.missing;
     const submitted = gameState.selectedServiceIds;
 
-    // Check which ones are correct
     let roundPoints = 0;
     const correctIdentified = [];
     const missedComponents = [];
@@ -600,11 +611,9 @@
       }
     });
 
-    // Update Score
     gameState.totalScore += roundPoints;
     dom.scoreDisplay.textContent = gameState.totalScore;
 
-    // Sound FX
     if (roundPoints === MAX_ROUND_SCORE) {
       window.soundFx.correct();
       updateRoundTracker(gameState.currentRoundIndex, 'cleared-perfect');
@@ -616,7 +625,6 @@
       updateRoundTracker(gameState.currentRoundIndex, 'cleared-missed');
     }
 
-    // Save round log for final table
     gameState.roundLogs.push({
       round: gameState.currentRoundIndex + 1,
       title: arch.title,
@@ -626,13 +634,12 @@
       elapsedStr: `${(roundElapsedMs / 1000).toFixed(1)}s`
     });
 
-    // Display Round Evaluation Modal
     showRoundEvaluation(roundPoints, arch, correctIdentified, missedComponents);
   }
 
   // Display Round Evaluation Modal
   function showRoundEvaluation(points, arch, correct, missed) {
-    dom.evalRoundBadge.textContent = `ROUND ${gameState.currentRoundIndex + 1} OF 10`;
+    dom.evalRoundBadge.textContent = `ROUND ${gameState.currentRoundIndex + 1} OF 8`;
     dom.evalPoints.textContent = `+${points}`;
 
     if (points === MAX_ROUND_SCORE) {
@@ -646,10 +653,9 @@
       dom.evalTitle.textContent = 'Missing Components Undetected';
     }
 
-    // Breakdown list of all 3 missing items
     dom.evalItemsList.innerHTML = arch.missing.map(svcId => {
       const isFound = correct.includes(svcId);
-      const meta = window.AWS_SERVICE_NAMES[svcId] || { name: svcId, category: 'AWS Service' };
+      const meta = window.AWS_SERVICE_NAMES[svcId] || { name: svcId, category: 'AWS' };
       const iconSvg = window.AWS_ICONS[svcId] || window.AWS_ICONS.missing;
       const reason = arch.reasons[svcId] || "Critical component required for architecture operation.";
 
@@ -669,7 +675,6 @@
       `;
     }).join('');
 
-    // Auto-advance countdown
     gameState.autoAdvanceSeconds = 4;
     dom.autoAdvanceTimerSpan.textContent = gameState.autoAdvanceSeconds;
     
@@ -698,7 +703,6 @@
       finishGame(false);
     } else {
       loadCurrentArchitecture();
-      // Set active dot on tracker
       const step = document.getElementById(`round-step-${gameState.currentRoundIndex}`);
       if (step) step.classList.add('active');
     }
@@ -717,7 +721,6 @@
   window.addEventListener('keydown', (e) => {
     if (!gameState.isActive) return;
 
-    // Enter to submit
     if (e.key === 'Enter') {
       if (dom.modalRoundEval.classList.contains('active')) {
         dom.btnNextRound.click();
@@ -726,7 +729,6 @@
       }
     }
 
-    // Escape to clear or close modal
     if (e.key === 'Escape') {
       if (dom.modalRules.classList.contains('active')) {
         dom.btnCloseRules.click();
@@ -746,17 +748,13 @@
       gameState.elapsedMs = now - gameState.startTime;
       const remainingMs = Math.max(0, MASTER_TIMER_MS - gameState.elapsedMs);
 
-      // Render clock
       dom.timerDisplay.innerHTML = formatTime(remainingMs);
 
-      // Progress bar fill
       const pct = (remainingMs / MASTER_TIMER_MS) * 100;
       dom.timerProgressFill.style.width = `${pct}%`;
 
-      // Visual warning triggers
       if (remainingMs <= 30000) {
         dom.timerCard.className = 'hud-timer-card danger';
-        // Tick sound on every full second
         if (Math.floor(remainingMs / 1000) !== Math.floor((remainingMs + 30) / 1000)) {
           window.soundFx.tick();
         }
@@ -766,7 +764,6 @@
         dom.timerCard.className = 'hud-timer-card';
       }
 
-      // Check for timeout
       if (remainingMs <= 0) {
         clearInterval(gameState.timerInterval);
         handleTimeout();
@@ -777,7 +774,6 @@
   // Handle Station Timer Timeout
   function handleTimeout() {
     window.soundFx.warning();
-    // Auto submit any selections if mid-round
     if (gameState.currentRoundIndex < TOTAL_ROUNDS) {
       const arch = window.CONFIG_MAP_DIAGRAMS[gameState.currentRoundIndex];
       if (arch) {
@@ -806,7 +802,7 @@
     finishGame(true);
   }
 
-  // Finish Game & Show Final Scorecard
+  // Finish Game & Show Final Scorecard (240 max points, 8 rounds)
   function finishGame(isTimeout = false) {
     gameState.isActive = false;
     clearInterval(gameState.timerInterval);
@@ -814,35 +810,32 @@
 
     window.soundFx.fanfare();
 
-    // Close any open round eval modal
     dom.modalRoundEval.classList.remove('active');
     dom.modalRoundEval.classList.add('hidden');
 
-    // Populate scorecard
     dom.finalScoreVal.textContent = gameState.totalScore;
     const accuracy = ((gameState.totalScore / MAX_TOTAL_SCORE) * 100).toFixed(1);
     dom.finalAccuracyVal.textContent = `${accuracy}% Component Accuracy`;
 
     const totalDetected = Math.round(gameState.totalScore / POINTS_PER_COMPONENT);
-    dom.finalDetectedRatio.textContent = `${totalDetected} / 30`;
+    dom.finalDetectedRatio.textContent = `${totalDetected} / 24`;
 
-    // Tie-breaker elapsed time
     const finalElapsedStr = formatTimePlain(Math.min(gameState.elapsedMs, MASTER_TIMER_MS));
     dom.finalTimeVal.textContent = finalElapsedStr;
 
-    // Rank calculation
+    // Rank calculation (Thresholds out of 240)
     let rank = "Cloud Practitioner in Training";
     let icon = "🌱";
-    if (gameState.totalScore >= 280) {
+    if (gameState.totalScore >= 220) {
       rank = "🏆 Principal Cloud Enterprise Architect";
       icon = "🏆";
-    } else if (gameState.totalScore >= 230) {
+    } else if (gameState.totalScore >= 180) {
       rank = "⚡ Senior Solutions Architect";
       icon = "⚡";
-    } else if (gameState.totalScore >= 180) {
+    } else if (gameState.totalScore >= 140) {
       rank = "🛡️ Certified Cloud Observability Auditor";
       icon = "🛡️";
-    } else if (gameState.totalScore >= 110) {
+    } else if (gameState.totalScore >= 80) {
       rank = "🔍 Associate Cloud Inspector";
       icon = "🔍";
     }
@@ -850,7 +843,7 @@
     dom.gameoverRankTitle.textContent = rank;
     dom.gameoverRankIcon.textContent = icon;
 
-    // Fill 10-round breakdown table
+    // Fill 8-round breakdown table
     dom.gameoverTableBody.innerHTML = '';
     for (let i = 0; i < TOTAL_ROUNDS; i++) {
       const log = gameState.roundLogs[i];
@@ -881,37 +874,37 @@
       dom.gameoverTableBody.appendChild(tr);
     }
 
-    // Show Game Over modal
     dom.modalGameOver.classList.add('active');
     dom.modalGameOver.classList.remove('hidden');
   }
 
-  // Copy Official Tournament Score Report
+  // Copy Official Tournament Score Report (AWS Student Builder Group)
   dom.btnCopyScore.addEventListener('click', () => {
     const accuracy = ((gameState.totalScore / MAX_TOTAL_SCORE) * 100).toFixed(1);
     const finalElapsedStr = formatTimePlain(Math.min(gameState.elapsedMs, MASTER_TIMER_MS));
 
     const report = [
-      `================================================`,
-      `🗺️ CONFIG MAP — OFFICIAL AWS AUDIT SCORE REPORT`,
-      `================================================`,
+      `======================================================`,
+      `🗺️ AWS STUDENT BUILDER GROUP — CONFIG MAP REPORT`,
+      `======================================================`,
       `Station Location : Room 327 / 331 (Circuit Track)`,
-      `Final Score      : ${gameState.totalScore} / 300 Points`,
+      `Total Rounds     : 8 Architectures`,
+      `Final Score      : ${gameState.totalScore} / 240 Points`,
       `Accuracy         : ${accuracy}%`,
-      `Detected Delta   : ${Math.round(gameState.totalScore / 10)} / 30 Components`,
+      `Detected Delta   : ${Math.round(gameState.totalScore / 10)} / 24 Components`,
       `Official Clock   : ${finalElapsedStr} (Station Cap: 03:00.00)`,
       `Auditor Rank     : ${dom.gameoverRankTitle.textContent}`,
-      `------------------------------------------------`,
+      `------------------------------------------------------`,
       `Round Log:`,
       ...gameState.roundLogs.map(l => `  • Round ${l.round}: ${l.score}/30 pts (${l.elapsedStr}) - ${l.title}`),
-      `================================================`
+      `======================================================`
     ].join('\n');
 
     navigator.clipboard.writeText(report).then(() => {
       dom.copyBtnText.textContent = "Copied to Clipboard!";
       window.soundFx.click();
       setTimeout(() => {
-        dom.copyBtnText.textContent = "Copy Official Score Report";
+        dom.copyBtnText.textContent = "Copy Score Report";
       }, 2500);
     });
   });
@@ -926,6 +919,7 @@
 
     dom.scoreDisplay.textContent = '0';
     dom.modalIntro.classList.remove('active');
+    dom.modalIntro.classList.add('hidden');
     dom.modalGameOver.classList.remove('active');
     dom.modalGameOver.classList.add('hidden');
     dom.modalRoundEval.classList.remove('active');
@@ -990,23 +984,12 @@
     }
   });
 
-  // Sync initial sound state icon
   if (window.soundFx.muted) {
     dom.iconSoundOn.classList.add('hidden');
     dom.iconSoundOff.classList.remove('hidden');
   }
 
-  // Fullscreen Toggle
-  dom.btnFullscreen.addEventListener('click', () => {
-    window.soundFx.click();
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  });
-
-  // View Mode Controls (Side-by-Side vs Diff Overlay)
+  // View Mode Controls (Side-by-Side vs Diff Mode)
   dom.btnDiffMode.addEventListener('click', () => {
     gameState.diffMode = !gameState.diffMode;
     dom.btnDiffMode.classList.toggle('active', gameState.diffMode);
